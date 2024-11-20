@@ -6,7 +6,6 @@ param (
 # Define static variables
 $PrimaryFrontendResourceGroupName = "rgasrwlpri903daa34"
 $SecondaryFrontendResourceGroupName = "rgasrwlsec903daa34-northeurope"
-$FrontendVMName = "VM1-FE"
 $PrimaryBackendIP = "10.0.3.4"
 $SecondaryBackendIP = "10.1.2.4"
 $FrontendServiceName = "YourFrontendServiceName"
@@ -14,7 +13,6 @@ $FrontendEnvFilePath = "C:\Users\TomasTheAdmin\todo-frontend\.env" # Path to the
 
 $PrimaryBackendResourceGroupName = "rgasrwlpri903daa34"
 $SecondaryBackendResourceGroupName = "rgasrwlsec903daa34-northeurope"
-$BackendVMName = "VM2-BE"
 $BackendServiceName = "YourBackendServiceName"
 $BackendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\ToDoApi\.env" # Path to the backend .env file
 
@@ -41,6 +39,12 @@ if ($FailoverDirection -eq "PrimaryToSecondary") {
 # Connect to Azure using Managed Identity
 Connect-AzAccount -Identity
 
+# Query the frontend VM based on tags
+$frontendVM = Get-AzVM -ResourceGroupName $FrontendResourceGroupName | Where-Object { $_.Tags["Role"] -eq "Frontend" }
+
+# Query the backend VM based on tags
+$backendVM = Get-AzVM -ResourceGroupName $BackendResourceGroupName | Where-Object { $_.Tags["Role"] -eq "Backend" }
+
 # Script to update environment variable and restart service on the frontend VM
 $frontendScript = @"
 if (Test-Path '$FrontendEnvFilePath') {
@@ -60,7 +64,7 @@ Write-Output 'Frontend service restarted successfully.'
 "@
 
 # Run the script on the frontend VM
-Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $FrontendVMName -CommandId 'RunPowerShellScript' -ScriptString $frontendScript
+Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptString $frontendScript
 
 # Script to update environment variable and restart service on the backend VM
 $backendScript = @"
@@ -81,4 +85,4 @@ Write-Output 'Backend service restarted successfully.'
 "@
 
 # Run the script on the backend VM
-Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $BackendVMName -CommandId 'RunPowerShellScript' -ScriptString $backendScript
+Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptString $backendScript
