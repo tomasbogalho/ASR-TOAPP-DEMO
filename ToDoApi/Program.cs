@@ -25,10 +25,21 @@ namespace ToDoApi
                     var backendPort = Environment.GetEnvironmentVariable("BACKEND_PORT") ?? "6003";
                     var additionalIp = Environment.GetEnvironmentVariable("ADDITIONAL_IP1") ?? "10.0.3.4";
 
+                    // Validate IP addresses
+                    if (!IsValidIp(backendIp) || !IsValidIp(additionalIp))
+                    {
+                        throw new InvalidOperationException("Invalid IP address specified in environment variables.");
+                    }
+
                     webBuilder.UseUrls(
                         $"http://{backendIp}:{backendPort}",
                         $"http://{additionalIp}:{backendPort}"
                     );
                 });
+
+        private static bool IsValidIp(string ip)
+        {
+            return System.Net.IPAddress.TryParse(ip, out _);
+        }
     }
 }
