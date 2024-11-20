@@ -23,24 +23,19 @@ namespace ToDoApi
                     // Get backend IP and port from environment variables
                     var backendIp = Environment.GetEnvironmentVariable("BACKEND_IP") ?? "localhost";
                     var backendPort = Environment.GetEnvironmentVariable("BACKEND_PORT") ?? "6003";
-                    var additionalIp = Environment.GetEnvironmentVariable("ADDITIONAL_IP1") ?? "10.0.3.4";
 
-                    // Validate IP addresses
-                    if (!IsValidIp(backendIp) || !IsValidIp(additionalIp))
+                    // Validate IP address
+                    if (!IsValidIp(backendIp))
                     {
                         throw new InvalidOperationException("Invalid IP address specified in environment variables.");
                     }
 
-                    webBuilder.UseUrls(
-                        $"http://{backendIp}:{backendPort}",
-                        $"http://{additionalIp}:{backendPort}"
-                    );
+                    webBuilder.UseUrls($"http://{backendIp}:{backendPort}");
                 });
 
         private static bool IsValidIp(string ip)
         {
             return System.Net.IPAddress.TryParse(ip, out _);
         }
-        
     }
 }
