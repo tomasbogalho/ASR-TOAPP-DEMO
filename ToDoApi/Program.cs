@@ -22,7 +22,7 @@ namespace ToDoApi
 
                     // Get backend IP and port from environment variables
                     var backendIp = Environment.GetEnvironmentVariable("BACKEND_IP") ?? "localhost";
-                    var backendPort = Environment.GetEnvironmentVariable("BACKEND_PORT") ?? "6002";
+                    var backendPort = Environment.GetEnvironmentVariable("BACKEND_PORT") ?? "6003";
                     var additionalIp1 = Environment.GetEnvironmentVariable("ADDITIONAL_IP1") ?? "10.0.3.4";
                     var additionalIp2 = Environment.GetEnvironmentVariable("ADDITIONAL_IP2") ?? "10.1.2.4";
 
