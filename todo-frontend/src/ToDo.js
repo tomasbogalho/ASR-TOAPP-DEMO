@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 function ToDo() {
     const [items, setItems] = useState([]);
     const [description, setDescription] = useState('');
 
     useEffect(() => {
-        axios.get('http://10.0.3.4:6002/api/todo')
+        axios.get(`${API_BASE_URL}/api/todo`)
             .then(response => setItems(response.data))
             .catch(error => console.error('There was an error fetching the ToDo items!', error));
     }, []);
 
     const addItem = () => {
-        axios.post('http://10.0.3.4:6002/api/todo', { description, isCompleted: false })
+        axios.post(`${API_BASE_URL}/api/todo`, { description, isCompleted: false })
             .then(response => setItems([...items, response.data]))
             .catch(error => console.error('There was an error adding the ToDo item!', error));
     };

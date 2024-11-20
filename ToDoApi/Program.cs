@@ -15,7 +15,9 @@ namespace ToDoApi
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("http://localhost:6002","http://10.0.3.4:6002"); // Change the port to avoid conflict
+                    var backendIp = Environment.GetEnvironmentVariable("BACKEND_IP") ?? "localhost";
+                    var backendPort = Environment.GetEnvironmentVariable("BACKEND_PORT") ?? "6002";
+                    webBuilder.UseUrls($"http://{backendIp}:{backendPort}");
                 });
     }
 }

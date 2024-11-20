@@ -5,9 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using System;
-using Microsoft.Data.SqlClient; // Use Microsoft.Data.SqlClient
-using ToDoApi.Models; // Add this for ToDoContext
-using Microsoft.Extensions.Logging; // Add this for logging
+using Microsoft.Data.SqlClient;
+using ToDoApi.Models;
+using Microsoft.Extensions.Logging;
 
 namespace ToDoApi
 {
@@ -22,8 +22,11 @@ namespace ToDoApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") 
+                                   ?? Configuration.GetConnectionString("DefaultConnection");
+
             services.AddDbContext<ToDoContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(connectionString));
             services.AddControllers();
             services.AddCors(options =>
             {
@@ -31,11 +34,8 @@ namespace ToDoApi
                     builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
 
-            // Add logging services
             services.AddLogging();
 
-            // Test the database connection
-            var connectionString = Configuration.GetConnectionString("DefaultConnection");
             if (!string.IsNullOrEmpty(connectionString))
             {
                 TestDatabaseConnection(connectionString);
