@@ -15,7 +15,9 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "BACKEND_IP": "localhost",
-        "BACKEND_PORT": "6002"
+        "BACKEND_PORT": "6002",
+        "ADDITIONAL_IP1": "10.0.3.4",
+        "ADDITIONAL_IP2": "10.1.2.4"
       }
     }
   }
