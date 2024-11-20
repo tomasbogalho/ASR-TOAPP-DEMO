@@ -48,10 +48,15 @@ if (Test-Path '$FrontendEnvFilePath') {
     \$envFilePath = '$FrontendEnvFilePath'
     \$newBackendIP = '$newBackendIP'
     \$envFileContent = Get-Content -Path \$envFilePath
-    \$updatedEnvFileContent = \$envFileContent -replace 'REACT_APP_API_BASE_URL=.*', 'REACT_APP_API_BASE_URL=http://\$newBackendIP:6002'
+    \$updatedEnvFileContent = \$envFileContent -replace 'REACT_APP_API_BASE_URL=.*', 'REACT_APP_API_BASE_URL=http://\$newBackendIP:6003'
     Set-Content -Path \$envFilePath -Value \$updatedEnvFileContent
+    Write-Output 'Frontend .env file updated successfully.'
+} else {
+    Write-Output 'Frontend .env file not found.'
 }
-Restart-Service -Name '$FrontendServiceName'
+cd C:\Users\TomasTheAdmin\todo-frontend
+npm start
+Write-Output 'Frontend service restarted successfully.'
 "@
 
 # Run the script on the frontend VM
@@ -66,8 +71,13 @@ if (Test-Path '$BackendEnvFilePath') {
     \$envFileContent = Get-Content -Path \$envFilePath
     \$updatedEnvFileContent = \$envFileContent -replace 'BACKEND_IP=.*', 'BACKEND_IP=\$newBackendIP'
     Set-Content -Path \$envFilePath -Value \$updatedEnvFileContent
+    Write-Output 'Backend .env file updated successfully.'
+} else {
+    Write-Output 'Backend .env file not found.'
 }
-Restart-Service -Name '$BackendServiceName'
+cd C:\Users\TomasTheAdmin\demoapp\ToDoApi
+dotnet run
+Write-Output 'Backend service restarted successfully.'
 "@
 
 # Run the script on the backend VM
