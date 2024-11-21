@@ -1,8 +1,5 @@
-$PrimaryFrontendResourceGroupName = "rgasrwlpri903daa34"
-$SecondaryFrontendResourceGroupName = "rgasrwlsec903daa34-northeurope"
-$PrimaryBackendIP = "10.0.3.4"
 $SecondaryBackendIP = "10.1.2.4"
-$FrontendEnvFilePath = "C:\Users\TomasTheAdmin\todo-frontend\.env" # Path to the frontend .env file
+$FrontendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\todo-frontend\.env" # Path to the frontend .env file
 
 Write-Output 'Starting frontend script...'
 if (Test-Path $FrontendEnvFilePath) {

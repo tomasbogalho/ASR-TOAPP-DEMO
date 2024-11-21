@@ -9,10 +9,11 @@ if (Test-Path $BackendEnvFilePath) {
     Write-Output 'Backend .env file found.'
     # Update .env file
     $envFilePath = $BackendEnvFilePath
+    $newBackendIP = $newBackendIP
     $envFileContent = Get-Content -Path $envFilePath
     Write-Output 'Current .env file content:'
     Write-Output $envFileContent
-    $updatedEnvFileContent = $envFileContent -replace 'BACKEND_IP=.*', ('BACKEND_IP='+$newBackendIP)
+    $updatedEnvFileContent = $envFileContent -replace 'BACKEND_IP=.*', 'BACKEND_IP=\$newBackendIP'
     Set-Content -Path $envFilePath -Value $updatedEnvFileContent
     Write-Output 'Updated .env file content:'
     Write-Output $updatedEnvFileContent
