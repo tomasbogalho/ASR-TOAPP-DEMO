@@ -53,7 +53,7 @@ $backendVM = if ($IsTestFailover) {
 }
 
 # Path to the scripts
-$frontendScriptPath = "C:\Users\TomasTheAdmin\Scripts\FrontendScript.ps1"
+$frontendScriptPath = "C:\Users\TomasTheAdmin\demoapp\Scripts\FrontendScript.ps1"
 $backendScriptPath = "C:\Users\TomasTheAdmin\demoapp\Scripts\BackendScript.ps1"
 
 # Script to update environment variable and restart service on the frontend VM
