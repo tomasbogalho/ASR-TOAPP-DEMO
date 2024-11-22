@@ -80,6 +80,11 @@ Write-Output "Backend VM Name: $($backendVM.Name)"
 $frontendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/FrontendScript.ps1"
 $backendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/BackendScript.ps1"
 
+# Ensure the Temp directory exists on the frontend VM
+Write-Output "Ensuring Temp directory exists on the frontend VM..."
+Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptString 'New-Item -Path "C:\Temp" -ItemType Directory -Force'
+Write-Output "Temp directory ensured on the frontend VM."
+
 # Download and run the frontend script on the frontend VM
 Write-Output "Downloading and running frontend script on the frontend VM..."
 $startTime = Get-Date
@@ -96,6 +101,11 @@ if (Test-Path $frontendLogPath) {
 } else {
     Write-Output "Frontend script log not found."
 }
+
+# Ensure the Temp directory exists on the backend VM
+Write-Output "Ensuring Temp directory exists on the backend VM..."
+Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptString 'New-Item -Path "C:\Temp" -ItemType Directory -Force'
+Write-Output "Temp directory ensured on the backend VM."
 
 # Download and run the backend script on the backend VM
 Write-Output "Downloading and running backend script on the backend VM..."
