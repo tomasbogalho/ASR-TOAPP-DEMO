@@ -1,125 +1,52 @@
-param (
-    [parameter(Mandatory=$false)]
-    [Object]$RecoveryPlanContext
-)
-
-# Define static variables
-$SecondaryFrontendResourceGroupName = "rgasrwlsec903daa34-northeurope"
-$PrimaryBackendIP = "10.0.3.4"
-$SecondaryBackendIP = "10.1.2.4"
-
 $PrimaryBackendResourceGroupName = "rgasrwlpri903daa34"
 $SecondaryBackendResourceGroupName = "rgasrwlsec903daa34-northeurope"
+$BackendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\ToDoApi\.env" # Path to the backend .env file
+$newBackendIP = "10.1.2.4"
+$LogFilePath = "C:\Temp\BackendScript.log"
 
-# Log the contents of the RecoveryPlanContext parameter
-Write-Output "RecoveryPlanContext parameter contents:"
-Write-Output $RecoveryPlanContext
+# Create or clear the log file
+New-Item -Path $LogFilePath -ItemType File -Force
 
-# Use the RecoveryPlanContext directly as a PowerShell object
-$RecoveryPlanContextObj = $RecoveryPlanContext
-
-# Log the contents of the RecoveryPlanContext object
-Write-Output "RecoveryPlanContext contents:"
-Write-Output $RecoveryPlanContextObj
-
-# Determine the failover direction from the RecoveryPlanContext
-$FailoverDirection = $RecoveryPlanContextObj.FailoverDirection
-Write-Output "Failover Direction Identified as: $FailoverDirection"
-
-# Determine the new backend IP address and resource groups based on the failover direction
-Write-Output "Setting the variables according to the failover direction..."
-if ($FailoverDirection -eq "PrimaryToSecondary") {
-    $newBackendIP = $SecondaryBackendIP
-    $FrontendResourceGroupName = $SecondaryFrontendResourceGroupName
-    $BackendResourceGroupName = $SecondaryBackendResourceGroupName
-} elseif ($FailoverDirection -eq "SecondaryToPrimary") {
-    $newBackendIP = $PrimaryBackendIP
-    $FrontendResourceGroupName = $PrimaryFrontendResourceGroupName
-    $BackendResourceGroupName = $PrimaryBackendResourceGroupName
+Write-Output 'Starting backend script...' | Out-File $LogFilePath -Append
+if (Test-Path $BackendEnvFilePath) {
+    Write-Output 'Backend .env file found.' | Out-File $LogFilePath -Append
+    # Update .env file
+    $envFilePath = $BackendEnvFilePath
+    $envFileContent = Get-Content -Path $envFilePath
+    Write-Output 'Current .env file content:' | Out-File $LogFilePath -Append
+    Write-Output $envFileContent | Out-File $LogFilePath -Append
+    $updatedEnvFileContent = $envFileContent -replace 'BACKEND_IP=.*', "BACKEND_IP=$newBackendIP"
+    Set-Content -Path $envFilePath -Value $updatedEnvFileContent
+    Write-Output 'Updated .env file content:' | Out-File $LogFilePath -Append
+    Write-Output $updatedEnvFileContent | Out-File $LogFilePath -Append
+    Write-Output 'Backend .env file updated successfully.' | Out-File $LogFilePath -Append
 } else {
-    throw "Invalid RecoveryPlanContext: Unable to determine failover direction."
+    Write-Output "Backend .env file not found at path: $BackendEnvFilePath" | Out-File $LogFilePath -Append
 }
-Write-Output "Variables set successfully. New Backend IP: $newBackendIP"
+cd C:\Users\TomasTheAdmin\demoapp\ToDoApi
 
-# Connect to Azure using Managed Identity
-Write-Output "Connecting to Azure using Managed Identity..."
-$startTime = Get-Date
-Connect-AzAccount -Identity
-$endTime = Get-Date
-Write-Output "Connected to Azure. Time taken: $($endTime - $startTime)"
+# Find all running `dotnet` processes
+$dotnetProcesses = Get-CimInstance Win32_Process | Where-Object { $_.Name -eq "dotnet.exe" }
 
-# Determine if this is a test failover
-$IsTestFailover = $RecoveryPlanContextObj.FailoverType -eq "Test"
-Write-Output "Is Test Failover: $IsTestFailover"
+# Check if any `dotnet` processes are running
+if ($dotnetProcesses) {
+    Write-Host "Found .NET processes running:" -ForegroundColor Green | Out-File $LogFilePath -Append
+    $dotnetProcesses | Select-Object ProcessId, CommandLine | Format-Table | Out-File $LogFilePath -Append
 
-# Query the frontend VM based on tags or naming convention
-Write-Output "Querying frontend VM..."
-$startTime = Get-Date
-$frontendVM = if ($IsTestFailover) {
-    Get-AzVM -ResourceGroupName $FrontendResourceGroupName | Where-Object { $_.Name -match "VM1-FE-test" -and $_.Tags["Role"] -eq "Frontend" }
+    # Stop each process
+    foreach ($process in $dotnetProcesses) {
+        try {
+            Write-Host "Stopping process ID $($process.ProcessId)..." -ForegroundColor Yellow | Out-File $LogFilePath -Append
+            Stop-Process -Id $process.ProcessId -Force -ErrorAction Stop
+            Write-Host "Successfully stopped process ID $($process.ProcessId)." -ForegroundColor Green | Out-File $LogFilePath -Append
+        } catch {
+            Write-Host "Failed to stop process ID $($process.ProcessId): $_" -ForegroundColor Red | Out-File $LogFilePath -Append
+        }
+    }
 } else {
-    Get-AzVM -ResourceGroupName $FrontendResourceGroupName | Where-Object { $_.Tags["Role"] -eq "Frontend" }
-}
-$endTime = Get-Date
-Write-Output "Frontend VM queried. Time taken: $($endTime - $startTime)"
-Write-Output "Frontend VM Name: $($frontendVM.Name)"
-
-# Query the backend VM based on tags or naming convention
-Write-Output "Querying backend VM..."
-$startTime = Get-Date
-$backendVM = if ($IsTestFailover) {
-    Get-AzVM -ResourceGroupName $BackendResourceGroupName | Where-Object { $_.Name -match "VM2-BE-test" -and $_.Tags["Role"] -eq "Backend" }
-} else {
-    Get-AzVM -ResourceGroupName $BackendResourceGroupName | Where-Object { $_.Tags["Role"] -eq "Backend" }
-}
-$endTime = Get-Date
-Write-Output "Backend VM queried. Time taken: $($endTime - $startTime)"
-Write-Output "Backend VM Name: $($backendVM.Name)"
-
-# URLs to the scripts
-$frontendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/FrontendScript.ps1"
-$backendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/BackendScript.ps1"
-
-# Ensure the Temp directory exists on the frontend VM
-Write-Output "Ensuring Temp directory exists on the frontend VM..."
-Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptString 'New-Item -Path "C:\Temp" -ItemType Directory -Force'
-Write-Output "Temp directory ensured on the frontend VM."
-
-# Download and run the frontend script on the frontend VM
-Write-Output "Downloading and running frontend script on the frontend VM..."
-$startTime = Get-Date
-Invoke-WebRequest -Uri $frontendScriptUrl -OutFile "C:\Temp\FrontendScript.ps1"
-Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptPath 'C:\Temp\FrontendScript.ps1'
-$endTime = Get-Date
-Write-Output "Frontend VM updated. Time taken: $($endTime - $startTime)"
-
-# Read and output the frontend script log
-$frontendLogPath = "C:\Temp\FrontendScript.log"
-if (Test-Path $frontendLogPath) {
-    Write-Output "Frontend Script Log:"
-    Get-Content -Path $frontendLogPath | Write-Output
-} else {
-    Write-Output "Frontend script log not found."
+    Write-Host "No .NET processes found." -ForegroundColor Cyan | Out-File $LogFilePath -Append
 }
 
-# Ensure the Temp directory exists on the backend VM
-Write-Output "Ensuring Temp directory exists on the backend VM..."
-Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptString 'New-Item -Path "C:\Temp" -ItemType Directory -Force'
-Write-Output "Temp directory ensured on the backend VM."
-
-# Download and run the backend script on the backend VM
-Write-Output "Downloading and running backend script on the backend VM..."
-$startTime = Get-Date
-Invoke-WebRequest -Uri $backendScriptUrl -OutFile "C:\Temp\BackendScript.ps1"
-Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptPath 'C:\Temp\BackendScript.ps1'
-$endTime = Get-Date
-Write-Output "Backend VM updated. Time taken: $($endTime - $startTime)"
-
-# Read and output the backend script log
-$backendLogPath = "C:\Temp\BackendScript.log"
-if (Test-Path $backendLogPath) {
-    Write-Output "Backend Script Log:"
-    Get-Content -Path $backendLogPath | Write-Output
-} else {
-    Write-Output "Backend script log not found."
-}
+Write-Output 'Running dotnet run...' | Out-File $LogFilePath -Append
+dotnet run | Out-File $LogFilePath -Append
+Write-Output 'Backend service restarted successfully.' | Out-File $LogFilePath -Append

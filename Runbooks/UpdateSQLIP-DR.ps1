@@ -80,36 +80,46 @@ Write-Output "Backend VM Name: $($backendVM.Name)"
 $frontendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/FrontendScript.ps1"
 $backendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/BackendScript.ps1"
 
-# Download and run the frontend script on the frontend VM
-Write-Output "Downloading and running frontend script on the frontend VM..."
+# Ensure the Temp directory exists on the frontend VM
+Write-Output "Ensuring Temp directory exists on the frontend VM..."
+Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptString 'New-Item -Path "C:\Temp" -ItemType Directory -Force'
+Write-Output "Temp directory ensured on the frontend VM."
+
+# Run the frontend script on the frontend VM
+Write-Output "Running frontend script on the frontend VM..."
 $startTime = Get-Date
-Invoke-WebRequest -Uri $frontendScriptUrl -OutFile "C:\Temp\FrontendScript.ps1"
-Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptPath 'C:\Temp\FrontendScript.ps1'
+Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptString (Invoke-WebRequest -Uri $frontendScriptUrl).Content
 $endTime = Get-Date
 Write-Output "Frontend VM updated. Time taken: $($endTime - $startTime)"
 
 # Read and output the frontend script log
 $frontendLogPath = "C:\Temp\FrontendScript.log"
-if (Test-Path $frontendLogPath) {
+$frontendLogContent = Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptString "Get-Content -Path $frontendLogPath -Raw"
+if ($frontendLogContent.Value) {
     Write-Output "Frontend Script Log:"
-    Get-Content -Path $frontendLogPath | Write-Output
+    Write-Output $frontendLogContent.Value
 } else {
     Write-Output "Frontend script log not found."
 }
 
-# Download and run the backend script on the backend VM
-Write-Output "Downloading and running backend script on the backend VM..."
+# Ensure the Temp directory exists on the backend VM
+Write-Output "Ensuring Temp directory exists on the backend VM..."
+Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptString 'New-Item -Path "C:\Temp" -ItemType Directory -Force'
+Write-Output "Temp directory ensured on the backend VM."
+
+# Run the backend script on the backend VM
+Write-Output "Running backend script on the backend VM..."
 $startTime = Get-Date
-Invoke-WebRequest -Uri $backendScriptUrl -OutFile "C:\Temp\BackendScript.ps1"
-Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptPath 'C:\Temp\BackendScript.ps1'
+Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptString (Invoke-WebRequest -Uri $backendScriptUrl).Content
 $endTime = Get-Date
 Write-Output "Backend VM updated. Time taken: $($endTime - $startTime)"
 
 # Read and output the backend script log
 $backendLogPath = "C:\Temp\BackendScript.log"
-if (Test-Path $backendLogPath) {
+$backendLogContent = Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptString "Get-Content -Path $backendLogPath -Raw"
+if ($backendLogContent.Value) {
     Write-Output "Backend Script Log:"
-    Get-Content -Path $backendLogPath | Write-Output
+    Write-Output $backendLogContent.Value
 } else {
     Write-Output "Backend script log not found."
 }
