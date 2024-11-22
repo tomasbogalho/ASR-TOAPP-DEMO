@@ -56,22 +56,12 @@ $backendVM = if ($IsTestFailover) {
 $frontendScriptPath = "C:\Users\TomasTheAdmin\demoapp\Scripts\FrontendScript.ps1"
 $backendScriptPath = "C:\Users\TomasTheAdmin\demoapp\Scripts\BackendScript.ps1"
 
-# Script to update environment variable and restart service on the frontend VM
-$frontendScript = @"
-. `$frontendScriptPath
-"@
-
 # Run the script on the frontend VM
 Write-Output "Updating frontend VM..."
-Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptString $frontendScript
+Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptPath $frontendScriptPath
 Write-Output "Frontend VM updated."
-
-# Script to update environment variable and restart service on the backend VM
-$backendScript = @"
-. `$backendScriptPath
-"@
 
 # Run the script on the backend VM
 Write-Output "Updating backend VM..."
-Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptString $backendScript
+Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptPath $backendScriptPath
 Write-Output "Backend VM updated."
