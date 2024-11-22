@@ -15,19 +15,8 @@ $SecondaryBackendResourceGroupName = "rgasrwlsec903daa34-northeurope"
 Write-Output "RecoveryPlanContext parameter contents:"
 Write-Output $RecoveryPlanContext
 
-# Convert RecoveryPlanContext from JSON
-Write-Output "Converting RecoveryPlanContext from JSON..."
-try {
-    if ($RecoveryPlanContext -is [string]) {
-        $RecoveryPlanContextObj = $RecoveryPlanContext | ConvertFrom-Json
-    } else {
-        $RecoveryPlanContextObj = $RecoveryPlanContext
-    }
-    Write-Output "RecoveryPlanContext converted successfully."
-} catch {
-    Write-Output "Failed to convert RecoveryPlanContext from JSON. Error: $_"
-    throw $_
-}
+# Use the RecoveryPlanContext directly as a PowerShell object
+$RecoveryPlanContextObj = $RecoveryPlanContext
 
 # Log the contents of the RecoveryPlanContext object
 Write-Output "RecoveryPlanContext contents:"
