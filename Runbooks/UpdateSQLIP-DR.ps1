@@ -12,10 +12,15 @@ $SecondaryBackendIP = "10.1.2.4"
 $PrimaryBackendResourceGroupName = "rgasrwlpri903daa34"
 $SecondaryBackendResourceGroupName = "rgasrwlsec903daa34-northeurope"
 
-# Convert RecoveryPlanContext from JSON
-Write-Output "Converting RecoveryPlanContext from JSON..."
-$RecoveryPlanContextObj = $RecoveryPlanContext | ConvertFrom-Json
-Write-Output "RecoveryPlanContext converted successfully."
+
+# Determine the failover direction from the RecoveryPlanContext
+$FailoverDirection = if ($RecoveryPlanContext.RecoveryPlanName -match "PrimaryToSecondary") {
+    "PrimaryToSecondary"
+} elseif ($RecoveryPlanContext.RecoveryPlanName -match "SecondaryToPrimary") {
+    "SecondaryToPrimary"
+} else {
+    throw "Invalid RecoveryPlanContext: Unable to determine failover direction."
+}
 
 # Determine the failover direction from the RecoveryPlanContext
 $FailoverDirection = $RecoveryPlanContextObj.FailoverDirection
