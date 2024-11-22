@@ -72,8 +72,8 @@ Write-Output "Backend VM queried. Time taken: $($endTime - $startTime)"
 Write-Output "Backend VM Name: $($backendVM.Name)"
 
 # URLs to the scripts
-$frontendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/FrontendScript.ps1?token=GHSAT0AAAAAAC2YNZOIGIACPGHPGWDCN6WWZZ76KFA"
-$backendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/BackendScript.ps1?token=GHSAT0AAAAAAC2YNZOJUYIVKAW5GHT35ZGUZZ76JOQ"
+$frontendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/FrontendScript.ps1"
+$backendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/BackendScript.ps1"
 
 # Download and run the frontend script on the frontend VM
 Write-Output "Downloading and running frontend script on the frontend VM..."
