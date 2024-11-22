@@ -18,9 +18,9 @@ if (Test-Path $FrontendEnvFilePath) {
 } else {
     Write-Output 'Frontend .env file not found.'
 }
-cd C:\Users\TomasTheAdmin\todo-frontend
+cd C:\Users\TomasTheAdmin\demoapp\todo-frontend
 npx kill-port 3000
 npm start
 Write-Output 'Frontend service restarted successfully.'
 
-powershell.exe -windowstyle hidden -file C:\scripts\script.ps1
+#powershell.exe -windowstyle hidden -file C:\scripts\script.ps1
