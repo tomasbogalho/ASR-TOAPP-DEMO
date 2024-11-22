@@ -4,7 +4,6 @@ param (
 )
 
 # Define static variables
-$PrimaryFrontendResourceGroupName = "rgasrwlpri903daa34"
 $SecondaryFrontendResourceGroupName = "rgasrwlsec903daa34-northeurope"
 $PrimaryBackendIP = "10.0.3.4"
 $SecondaryBackendIP = "10.1.2.4"
@@ -12,15 +11,27 @@ $SecondaryBackendIP = "10.1.2.4"
 $PrimaryBackendResourceGroupName = "rgasrwlpri903daa34"
 $SecondaryBackendResourceGroupName = "rgasrwlsec903daa34-northeurope"
 
+# Log the contents of the RecoveryPlanContext parameter
+Write-Output "RecoveryPlanContext parameter contents:"
+Write-Output $RecoveryPlanContext
 
-# Determine the failover direction from the RecoveryPlanContext
-$FailoverDirection = if ($RecoveryPlanContext.RecoveryPlanName -match "PrimaryToSecondary") {
-    "PrimaryToSecondary"
-} elseif ($RecoveryPlanContext.RecoveryPlanName -match "SecondaryToPrimary") {
-    "SecondaryToPrimary"
-} else {
-    throw "Invalid RecoveryPlanContext: Unable to determine failover direction."
+# Convert RecoveryPlanContext from JSON
+Write-Output "Converting RecoveryPlanContext from JSON..."
+try {
+    if ($RecoveryPlanContext -is [string]) {
+        $RecoveryPlanContextObj = $RecoveryPlanContext | ConvertFrom-Json
+    } else {
+        $RecoveryPlanContextObj = $RecoveryPlanContext
+    }
+    Write-Output "RecoveryPlanContext converted successfully."
+} catch {
+    Write-Output "Failed to convert RecoveryPlanContext from JSON. Error: $_"
+    throw $_
 }
+
+# Log the contents of the RecoveryPlanContext object
+Write-Output "RecoveryPlanContext contents:"
+Write-Output $RecoveryPlanContextObj
 
 # Determine the failover direction from the RecoveryPlanContext
 $FailoverDirection = $RecoveryPlanContextObj.FailoverDirection
@@ -49,7 +60,7 @@ $endTime = Get-Date
 Write-Output "Connected to Azure. Time taken: $($endTime - $startTime)"
 
 # Determine if this is a test failover
-$IsTestFailover = $RecoveryPlanContextObj.RecoveryPlanName -match "TestFailover"
+$IsTestFailover = $RecoveryPlanContextObj.FailoverType -eq "Test"
 Write-Output "Is Test Failover: $IsTestFailover"
 
 # Query the frontend VM based on tags or naming convention
