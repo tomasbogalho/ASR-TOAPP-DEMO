@@ -52,26 +52,18 @@ $backendVM = if ($IsTestFailover) {
     Get-AzVM -ResourceGroupName $BackendResourceGroupName | Where-Object { $_.Tags["Role"] -eq "Backend" }
 }
 
-# Path to the scripts
-$frontendScriptPath = "C:\Users\TomasTheAdmin\demoapp\Scripts\FrontendScript.ps1"
-$backendScriptPath = "C:\Users\TomasTheAdmin\demoapp\Scripts\BackendScript.ps1"
+# URLs to the scripts
+$frontendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/FrontendScript.ps1?token=GHSAT0AAAAAAC2YNZOIGIACPGHPGWDCN6WWZZ76KFA"
+$backendScriptUrl = "https://raw.githubusercontent.com/tomasbogalho/ASR-TOAPP-DEMO/refs/heads/master/Scripts/BackendScript.ps1?token=GHSAT0AAAAAAC2YNZOJUYIVKAW5GHT35ZGUZZ76JOQ"
 
-# Script to update environment variable and restart service on the frontend VM
-$frontendScript = @"
-. `$frontendScriptPath
-"@
-
-# Run the script on the frontend VM
-Write-Output "Updating frontend VM..."
-Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptString $frontendScript
+# Download and run the frontend script on the frontend VM
+Write-Output "Downloading and running frontend script on the frontend VM..."
+Invoke-WebRequest -Uri $frontendScriptUrl -OutFile "FrontendScript.ps1"
+Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptPath 'FrontendScript.ps1'
 Write-Output "Frontend VM updated."
 
-# Script to update environment variable and restart service on the backend VM
-$backendScript = @"
-. `$backendScriptPath
-"@
-
-# Run the script on the backend VM
-Write-Output "Updating backend VM..."
-Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptString $backendScript
+# Download and run the backend script on the backend VM
+Write-Output "Downloading and running backend script on the backend VM..."
+Invoke-WebRequest -Uri $backendScriptUrl -OutFile "BackendScript.ps1"
+Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptPath 'BackendScript.ps1'
 Write-Output "Backend VM updated."
