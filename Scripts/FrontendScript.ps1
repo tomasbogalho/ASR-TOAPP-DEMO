@@ -45,8 +45,8 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     Start-Process -FilePath "npm" -ArgumentList "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend" -NoNewWindow -RedirectStandardOutput "C:\Temp\FrontendService.log" -RedirectStandardError "C:\Temp\FrontendService.log"
     Write-Output 'Frontend service started successfully in the background.' | Out-File $LogFilePath -Append
 
-    # Wait for a few seconds to allow the service to start
-    Start-Sleep -Seconds 10
+    # Wait for a longer period to allow the service to start
+    Start-Sleep -Seconds 30
 
     # Check if the frontend service is running
     try {
