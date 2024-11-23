@@ -53,7 +53,7 @@ if ($dotnetProcesses) {
 # Create a scheduled task to start the backend service
 Write-Output 'Creating scheduled task to start backend service...' | Out-File $LogFilePath -Append
 $Action = New-ScheduledTaskAction -Execute "dotnet" -Argument "run" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\ToDoApi"
-$Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(10)
+$Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(5)
 $Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
 $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -DontStopOnIdleEnd -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
 Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Principal $Principal -Settings $Settings | Out-File $LogFilePath -Append
@@ -63,7 +63,7 @@ Start-ScheduledTask -TaskName $TaskName | Out-File $LogFilePath -Append
 Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
 
 # Wait for a longer period to allow the service to start
-Start-Sleep -Seconds 60
+Start-Sleep -Seconds 5
 
 # Check if the backend service is running
 try {
