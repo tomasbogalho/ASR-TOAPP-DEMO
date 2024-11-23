@@ -48,5 +48,8 @@ if ($dotnetProcesses) {
 }
 
 Write-Output 'Running dotnet run...' | Out-File $LogFilePath -Append
-Start-Process -FilePath "dotnet" -ArgumentList "run" -NoNewWindow -RedirectStandardOutput $LogFilePath -RedirectStandardError $LogFilePath
+Start-Job -ScriptBlock {
+    cd C:\Users\TomasTheAdmin\demoapp\ToDoApi
+    dotnet run | Out-File C:\Temp\BackendService.log -Append
+}
 Write-Output 'Backend service started successfully in the background.' | Out-File $LogFilePath -Append

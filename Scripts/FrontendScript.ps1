@@ -40,8 +40,12 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     # Kill any process using port 3000
     npx kill-port 3000 | Out-File $LogFilePath -Append
 
-    # Start the frontend service in the background
-    Start-Process -FilePath "npm" -ArgumentList "start" -NoNewWindow -RedirectStandardOutput $LogFilePath -RedirectStandardError $LogFilePath
+    # Start the frontend service in the background using Start-Job
+    Write-Output 'Starting frontend service in the background...' | Out-File $LogFilePath -Append
+    Start-Job -ScriptBlock {
+        cd C:\Users\TomasTheAdmin\demoapp\todo-frontend
+        npm start | Out-File C:\Temp\FrontendService.log -Append
+    }
     Write-Output 'Frontend service started successfully in the background.' | Out-File $LogFilePath -Append
 } else {
     Write-Output "Frontend project path not found: C:\Users\TomasTheAdmin\demoapp\todo-frontend" | Out-File $LogFilePath -Append
