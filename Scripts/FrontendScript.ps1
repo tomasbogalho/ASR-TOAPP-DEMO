@@ -40,13 +40,25 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     # Kill any process using port 3000
     npx kill-port 3000 | Out-File $LogFilePath -Append
 
-    # Start the frontend service in the background using Start-Job
+    # Start the frontend service in the background using Start-Process
     Write-Output 'Starting frontend service in the background...' | Out-File $LogFilePath -Append
-    Start-Job -ScriptBlock {
-        cd C:\Users\TomasTheAdmin\demoapp\todo-frontend
-        npm start | Out-File C:\Temp\FrontendService.log -Append
-    }
+    Start-Process -FilePath "npm" -ArgumentList "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend" -NoNewWindow -RedirectStandardOutput "C:\Temp\FrontendService.log" -RedirectStandardError "C:\Temp\FrontendService.log"
     Write-Output 'Frontend service started successfully in the background.' | Out-File $LogFilePath -Append
+
+    # Wait for a few seconds to allow the service to start
+    Start-Sleep -Seconds 10
+
+    # Check if the frontend service is running
+    try {
+        $response = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing
+        if ($response.StatusCode -eq 200) {
+            Write-Output 'Frontend service is running.' | Out-File $LogFilePath -Append
+        } else {
+            Write-Output 'Frontend service is not running. Status code: ' + $response.StatusCode | Out-File $LogFilePath -Append
+        }
+    } catch {
+        Write-Output 'Failed to access frontend service. Error: ' + $_.Exception.Message | Out-File $LogFilePath -Append
+    }
 } else {
     Write-Output "Frontend project path not found: C:\Users\TomasTheAdmin\demoapp\todo-frontend" | Out-File $LogFilePath -Append
 }
