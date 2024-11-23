@@ -1,7 +1,8 @@
-$PrimaryBackendResourceGroupName = "rgasrwlpri903daa34"
-$SecondaryBackendResourceGroupName = "rgasrwlsec903daa34-northeurope"
+param (
+    [string]$newBackendIP
+)
+
 $BackendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\ToDoApi\.env" # Path to the backend .env file
-$newBackendIP = "10.1.2.4"
 $LogFilePath = "C:\Temp\BackendScript.log"
 $ServiceLogFilePath = "C:\Temp\BackendService.log"
 $TaskName = "StartBackendService"
@@ -26,6 +27,7 @@ if (Test-Path $BackendEnvFilePath) {
 } else {
     Write-Output "Backend .env file not found at path: $BackendEnvFilePath" | Out-File $LogFilePath -Append
 }
+
 cd C:\Users\TomasTheAdmin\demoapp\ToDoApi
 
 # Find all running `dotnet` processes

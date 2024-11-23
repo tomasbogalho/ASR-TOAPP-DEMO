@@ -1,4 +1,7 @@
-$SecondaryBackendIP = "10.1.2.4"
+param (
+    [string]$newBackendIP
+)
+
 $FrontendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\todo-frontend\.env" # Path to the frontend .env file
 $LogFilePath = "C:\Temp\FrontendScript.log"
 $ServiceLogFilePath = "C:\Temp\FrontendService.log"
@@ -13,7 +16,6 @@ if (Test-Path $FrontendEnvFilePath) {
     Write-Output 'Frontend .env file found.' | Out-File $LogFilePath -Append
     # Update .env file
     $envFilePath = $FrontendEnvFilePath
-    $newBackendIP = $SecondaryBackendIP
     $envFileContent = Get-Content -Path $envFilePath
     Write-Output 'Current .env file content:' | Out-File $LogFilePath -Append
     Write-Output $envFileContent | Out-File $LogFilePath -Append
@@ -28,7 +30,6 @@ if (Test-Path $FrontendEnvFilePath) {
 
 if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     cd C:\Users\TomasTheAdmin\demoapp\todo-frontend
-    Write-Output "Changed directory to C:\Users\TomasTheAdmin\demoapp\todo-frontend" | Out-File $LogFilePath -Append
     
     # Ensure dependencies are installed
     if (-not (Test-Path "node_modules")) {
@@ -60,7 +61,7 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
 
     # Check if the frontend service is running
     try {
-        $response = Invoke-WebRequest -Uri "http://localhost:6003" -UseBasicParsing
+        $response = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing
         if ($response.StatusCode -eq 200) {
             Write-Output 'Frontend service is running.' | Out-File $LogFilePath -Append
         } else {
