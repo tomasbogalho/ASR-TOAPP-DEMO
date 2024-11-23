@@ -8,8 +8,17 @@ $ServiceLogFilePath = "C:\Temp\BackendService.log"
 $TaskName = "StartBackendService"
 
 # Create or clear the log file
-New-Item -Path $LogFilePath -ItemType File -Force
-New-Item -Path $ServiceLogFilePath -ItemType File -Force
+if (-Not (Test-Path $LogFilePath)) {
+    New-Item -Path $LogFilePath -ItemType File -Force
+} else {
+    Clear-Content -Path $LogFilePath
+}
+
+if (-Not (Test-Path $ServiceLogFilePath)) {
+    New-Item -Path $ServiceLogFilePath -ItemType File -Force
+} else {
+    Clear-Content -Path $ServiceLogFilePath
+}
 
 Write-Output 'Starting backend script...' | Out-File $LogFilePath -Append
 if (Test-Path $BackendEnvFilePath) {
@@ -65,7 +74,7 @@ Start-ScheduledTask -TaskName $TaskName | Out-File $LogFilePath -Append
 Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
 
 # Wait for a longer period to allow the service to start
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 60
 
 # Check if the backend service is running
 try {

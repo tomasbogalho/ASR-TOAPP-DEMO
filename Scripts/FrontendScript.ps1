@@ -8,8 +8,17 @@ $ServiceLogFilePath = "C:\Temp\FrontendService.log"
 $TaskName = "StartFrontendService"
 
 # Create or clear the log file
-New-Item -Path $LogFilePath -ItemType File -Force
-New-Item -Path $ServiceLogFilePath -ItemType File -Force
+if (-Not (Test-Path $LogFilePath)) {
+    New-Item -Path $LogFilePath -ItemType File -Force
+} else {
+    Clear-Content -Path $LogFilePath
+}
+
+if (-Not (Test-Path $ServiceLogFilePath)) {
+    New-Item -Path $ServiceLogFilePath -ItemType File -Force
+} else {
+    Clear-Content -Path $ServiceLogFilePath
+}
 
 Write-Output 'Starting frontend script...' | Out-File $LogFilePath -Append
 if (Test-Path $FrontendEnvFilePath) {
@@ -57,7 +66,7 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
 
     # Wait for a longer period to allow the service to start
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 60
 
     # Check if the frontend service is running
     try {
