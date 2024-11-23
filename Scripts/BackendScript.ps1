@@ -48,5 +48,5 @@ if ($dotnetProcesses) {
 }
 
 Write-Output 'Running dotnet run...' | Out-File $LogFilePath -Append
-dotnet run | Out-File $LogFilePath -Append
-Write-Output 'Backend service restarted successfully.' | Out-File $LogFilePath -Append
+Start-Process -FilePath "dotnet" -ArgumentList "run" -NoNewWindow -RedirectStandardOutput $LogFilePath -RedirectStandardError $LogFilePath
+Write-Output 'Backend service started successfully in the background.' | Out-File $LogFilePath -Append
