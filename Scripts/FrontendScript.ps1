@@ -1,9 +1,12 @@
 $SecondaryBackendIP = "10.1.2.4"
 $FrontendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\todo-frontend\.env" # Path to the frontend .env file
 $LogFilePath = "C:\Temp\FrontendScript.log"
+$ServiceLogFilePath = "C:\Temp\FrontendService.log"
+$TaskName = "StartFrontendService"
 
 # Create or clear the log file
 New-Item -Path $LogFilePath -ItemType File -Force
+New-Item -Path $ServiceLogFilePath -ItemType File -Force
 
 Write-Output 'Starting frontend script...' | Out-File $LogFilePath -Append
 if (Test-Path $FrontendEnvFilePath) {
@@ -40,13 +43,20 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     # Kill any process using port 3000
     npx kill-port 3000 | Out-File $LogFilePath -Append
 
-    # Start the frontend service in the background using Start-Process
-    Write-Output 'Starting frontend service in the background...' | Out-File $LogFilePath -Append
-    Start-Process -FilePath "npm" -ArgumentList "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend" -NoNewWindow -RedirectStandardOutput "C:\Temp\FrontendService.log" -RedirectStandardError "C:\Temp\FrontendService.log"
-    Write-Output 'Frontend service started successfully in the background.' | Out-File $LogFilePath -Append
+    # Create a scheduled task to start the frontend service
+    Write-Output 'Creating scheduled task to start frontend service...' | Out-File $LogFilePath -Append
+    $Action = New-ScheduledTaskAction -Execute "npm" -Argument "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend"
+    $Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(10)
+    $Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+    $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -DontStopOnIdleEnd -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
+    Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Principal $Principal -Settings $Settings | Out-File $LogFilePath -Append
+
+    # Start the scheduled task
+    Start-ScheduledTask -TaskName $TaskName | Out-File $LogFilePath -Append
+    Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
 
     # Wait for a longer period to allow the service to start
-    Start-Sleep -Seconds 30
+    Start-Sleep -Seconds 60
 
     # Check if the frontend service is running
     try {
@@ -59,6 +69,13 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     } catch {
         Write-Output 'Failed to access frontend service. Error: ' + $_.Exception.Message | Out-File $LogFilePath -Append
     }
+
+    # Output the contents of the service log file
+    Write-Output 'Frontend service log:' | Out-File $LogFilePath -Append
+    Get-Content -Path $ServiceLogFilePath | Out-File $LogFilePath -Append
+
+    # Clean up the scheduled task
+    Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false | Out-File $LogFilePath -Append
 } else {
     Write-Output "Frontend project path not found: C:\Users\TomasTheAdmin\demoapp\todo-frontend" | Out-File $LogFilePath -Append
 }
