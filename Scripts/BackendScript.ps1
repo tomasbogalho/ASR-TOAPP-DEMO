@@ -3,9 +3,12 @@ $SecondaryBackendResourceGroupName = "rgasrwlsec903daa34-northeurope"
 $BackendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\ToDoApi\.env" # Path to the backend .env file
 $newBackendIP = "10.1.2.4"
 $LogFilePath = "C:\Temp\BackendScript.log"
+$ServiceLogFilePath = "C:\Temp\BackendService.log"
+$TaskName = "StartBackendService"
 
 # Create or clear the log file
 New-Item -Path $LogFilePath -ItemType File -Force
+New-Item -Path $ServiceLogFilePath -ItemType File -Force
 
 Write-Output 'Starting backend script...' | Out-File $LogFilePath -Append
 if (Test-Path $BackendEnvFilePath) {
@@ -47,9 +50,36 @@ if ($dotnetProcesses) {
     Write-Host "No .NET processes found." -ForegroundColor Cyan | Out-File $LogFilePath -Append
 }
 
-Write-Output 'Running dotnet run...' | Out-File $LogFilePath -Append
-Start-Job -ScriptBlock {
-    cd C:\Users\TomasTheAdmin\demoapp\ToDoApi
-    dotnet run | Out-File C:\Temp\BackendService.log -Append
+# Create a scheduled task to start the backend service
+Write-Output 'Creating scheduled task to start backend service...' | Out-File $LogFilePath -Append
+$Action = New-ScheduledTaskAction -Execute "dotnet" -Argument "run" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\ToDoApi"
+$Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(10)
+$Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+$Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -DontStopOnIdleEnd -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
+Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Principal $Principal -Settings $Settings | Out-File $LogFilePath -Append
+
+# Start the scheduled task
+Start-ScheduledTask -TaskName $TaskName | Out-File $LogFilePath -Append
+Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
+
+# Wait for a longer period to allow the service to start
+Start-Sleep -Seconds 60
+
+# Check if the backend service is running
+try {
+    $response = Invoke-WebRequest -Uri "http://localhost:5000" -UseBasicParsing
+    if ($response.StatusCode -eq 200) {
+        Write-Output 'Backend service is running.' | Out-File $LogFilePath -Append
+    } else {
+        Write-Output 'Backend service is not running. Status code: ' + $response.StatusCode | Out-File $LogFilePath -Append
+    }
+} catch {
+    Write-Output 'Failed to access backend service. Error: ' + $_.Exception.Message | Out-File $LogFilePath -Append
 }
-Write-Output 'Backend service started successfully in the background.' | Out-File $LogFilePath -Append
+
+# Output the contents of the service log file
+Write-Output 'Backend service log:' | Out-File $LogFilePath -Append
+Get-Content -Path $ServiceLogFilePath | Out-File $LogFilePath -Append
+
+# Clean up the scheduled task
+Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false | Out-File $LogFilePath -Append
