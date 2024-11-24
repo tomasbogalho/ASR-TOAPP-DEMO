@@ -1,30 +1,19 @@
-param (
-    [string]$newBackendIP
-)
-
+$SecondaryBackendIP = "10.1.2.4"
 $FrontendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\todo-frontend\.env" # Path to the frontend .env file
 $LogFilePath = "C:\Temp\FrontendScript.log"
 $ServiceLogFilePath = "C:\Temp\FrontendService.log"
 $TaskName = "StartFrontendService"
 
 # Create or clear the log file
-if (-Not (Test-Path $LogFilePath)) {
-    New-Item -Path $LogFilePath -ItemType File -Force
-} else {
-    Clear-Content -Path $LogFilePath
-}
-
-if (-Not (Test-Path $ServiceLogFilePath)) {
-    New-Item -Path $ServiceLogFilePath -ItemType File -Force
-} else {
-    Clear-Content -Path $ServiceLogFilePath
-}
+New-Item -Path $LogFilePath -ItemType File -Force
+New-Item -Path $ServiceLogFilePath -ItemType File -Force
 
 Write-Output 'Starting frontend script...' | Out-File $LogFilePath -Append
 if (Test-Path $FrontendEnvFilePath) {
     Write-Output 'Frontend .env file found.' | Out-File $LogFilePath -Append
     # Update .env file
     $envFilePath = $FrontendEnvFilePath
+    $newBackendIP = $SecondaryBackendIP
     $envFileContent = Get-Content -Path $envFilePath
     Write-Output 'Current .env file content:' | Out-File $LogFilePath -Append
     Write-Output $envFileContent | Out-File $LogFilePath -Append
@@ -39,6 +28,7 @@ if (Test-Path $FrontendEnvFilePath) {
 
 if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     cd C:\Users\TomasTheAdmin\demoapp\todo-frontend
+    Write-Output "Changed directory to C:\Users\TomasTheAdmin\demoapp\todo-frontend" | Out-File $LogFilePath -Append
     
     # Ensure dependencies are installed
     if (-not (Test-Path "node_modules")) {
@@ -66,11 +56,11 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
 
     # Wait for a longer period to allow the service to start
-    Start-Sleep -Seconds 60
+    Start-Sleep -Seconds 5
 
     # Check if the frontend service is running
     try {
-        $response = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing
+        $response = Invoke-WebRequest -Uri "http://localhost:6003" -UseBasicParsing
         if ($response.StatusCode -eq 200) {
             Write-Output 'Frontend service is running.' | Out-File $LogFilePath -Append
         } else {

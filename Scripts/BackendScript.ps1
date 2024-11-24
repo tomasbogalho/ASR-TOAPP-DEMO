@@ -1,24 +1,14 @@
-param (
-    [string]$newBackendIP
-)
-
+$PrimaryBackendResourceGroupName = "rgasrwlpri903daa34"
+$SecondaryBackendResourceGroupName = "rgasrwlsec903daa34-northeurope"
 $BackendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\ToDoApi\.env" # Path to the backend .env file
+$newBackendIP = "10.1.2.4"
 $LogFilePath = "C:\Temp\BackendScript.log"
 $ServiceLogFilePath = "C:\Temp\BackendService.log"
 $TaskName = "StartBackendService"
 
 # Create or clear the log file
-if (-Not (Test-Path $LogFilePath)) {
-    New-Item -Path $LogFilePath -ItemType File -Force
-} else {
-    Clear-Content -Path $LogFilePath
-}
-
-if (-Not (Test-Path $ServiceLogFilePath)) {
-    New-Item -Path $ServiceLogFilePath -ItemType File -Force
-} else {
-    Clear-Content -Path $ServiceLogFilePath
-}
+New-Item -Path $LogFilePath -ItemType File -Force
+New-Item -Path $ServiceLogFilePath -ItemType File -Force
 
 Write-Output 'Starting backend script...' | Out-File $LogFilePath -Append
 if (Test-Path $BackendEnvFilePath) {
@@ -36,7 +26,6 @@ if (Test-Path $BackendEnvFilePath) {
 } else {
     Write-Output "Backend .env file not found at path: $BackendEnvFilePath" | Out-File $LogFilePath -Append
 }
-
 cd C:\Users\TomasTheAdmin\demoapp\ToDoApi
 
 # Find all running `dotnet` processes
@@ -74,11 +63,11 @@ Start-ScheduledTask -TaskName $TaskName | Out-File $LogFilePath -Append
 Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
 
 # Wait for a longer period to allow the service to start
-Start-Sleep -Seconds 60
+Start-Sleep -Seconds 5
 
 # Check if the backend service is running
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:6003" -UseBasicParsing
+    $response = Invoke-WebRequest -Uri "http://localhost:5000" -UseBasicParsing
     if ($response.StatusCode -eq 200) {
         Write-Output 'Backend service is running.' | Out-File $LogFilePath -Append
     } else {
