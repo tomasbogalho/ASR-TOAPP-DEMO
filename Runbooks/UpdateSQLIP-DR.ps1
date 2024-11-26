@@ -72,8 +72,8 @@ Write-Output "Ensuring Temp directory exists on the backend VM..."
 Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptString 'New-Item -Path "C:\Temp" -ItemType Directory -Force'
 Write-Output "Temp directory ensured on the backend VM."
 
-# Run the frontend script on the frontend VM in parallel
-$frontendJob = Start-Job -ScriptBlock {
+# Run the frontend script on the frontend VM in parallel using ThreadJob
+$frontendJob = Start-ThreadJob -ScriptBlock {
     param ($frontendScriptUrl, $newBackendIP, $FrontendResourceGroupName, $frontendVM)
     Write-Output "Downloading and executing frontend script on the frontend VM..."
     Invoke-AzVMRunCommand -ResourceGroupName $FrontendResourceGroupName -VMName $frontendVM.Name -CommandId 'RunPowerShellScript' -ScriptString @"
@@ -83,8 +83,8 @@ Invoke-WebRequest -Uri '$frontendScriptUrl' -OutFile 'FrontendScript.ps1'
     Write-Output "Frontend VM updated."
 } -ArgumentList $frontendScriptUrl, $newBackendIP, $FrontendResourceGroupName, $frontendVM
 
-# Run the backend script on the backend VM in parallel
-$backendJob = Start-Job -ScriptBlock {
+# Run the backend script on the backend VM in parallel using ThreadJob
+$backendJob = Start-ThreadJob -ScriptBlock {
     param ($backendScriptUrl, $newBackendIP, $BackendResourceGroupName, $backendVM)
     Write-Output "Downloading and executing backend script on the backend VM..."
     Invoke-AzVMRunCommand -ResourceGroupName $BackendResourceGroupName -VMName $backendVM.Name -CommandId 'RunPowerShellScript' -ScriptString @"
