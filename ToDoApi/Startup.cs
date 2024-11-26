@@ -60,6 +60,11 @@ namespace ToDoApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapGet("/api/backend-ip", async context =>
+                {
+                    var backendIp = Environment.GetEnvironmentVariable("BACKEND_IP") ?? "Unknown";
+                    await context.Response.WriteAsync(backendIp);
+                });
             });
         }
 
@@ -70,7 +75,7 @@ namespace ToDoApi
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-                    Console.WriteLine("Database connection successful!");
+                    Console.WriteLine("Database connection successful.");
                 }
             }
             catch (Exception ex)
