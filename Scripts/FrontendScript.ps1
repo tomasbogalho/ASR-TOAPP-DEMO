@@ -1,4 +1,5 @@
-$SecondaryBackendIP = "10.1.2.4"
+#$SecondaryBackendIP = "10.1.2.4"
+$SecondaryBackendIP = "10.0.3.4"
 $FrontendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\todo-frontend\.env" # Path to the frontend .env file
 $LogFilePath = "C:\Temp\FrontendScript.log"
 $ServiceLogFilePath = "C:\Temp\FrontendService.log"
@@ -17,8 +18,8 @@ if (Test-Path $FrontendEnvFilePath) {
     $envFileContent = Get-Content -Path $envFilePath
     Write-Output 'Current .env file content:' | Out-File $LogFilePath -Append
     Write-Output $envFileContent | Out-File $LogFilePath -Append
-    $updatedEnvFileContent = $envFileContent -replace "REACT_APP_API_BASE_URL=.*", "REACT_APP_API_BASE_URL=http://"+$newBackendIP+":6003"
-    Set-Content -Path $envFilePath -Value $updatedEnvFileContent -Force
+    $updatedEnvFileContent = "REACT_APP_API_BASE_URL=http://"+$newBackendIP+":6003"
+    Set-Content -Path $envFilePath -Value $updatedEnvFileContent
     Write-Output 'Updated .env file content:' | Out-File $LogFilePath -Append
     Write-Output $updatedEnvFileContent | Out-File $LogFilePath -Append
     Write-Output 'Frontend .env file updated successfully.' | Out-File $LogFilePath -Append
@@ -56,7 +57,7 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
 
     # Wait for a longer period to allow the service to start
-    Start-Sleep -Seconds 10
+    Start-Sleep -Seconds 30
 
     # Check if the frontend service is running
     #try {
