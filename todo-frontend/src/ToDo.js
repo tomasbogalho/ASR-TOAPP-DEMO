@@ -4,58 +4,31 @@ import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function ToDo() {
-    const [backendIp, setBackendIp] = useState('');
-    const [frontendIp, setFrontendIp] = useState('');
-    const [tasks, setTasks] = useState([]);
-    const [newTask, setNewTask] = useState('');
+    const [items, setItems] = useState([]);
+    const [description, setDescription] = useState('');
 
     useEffect(() => {
-        // Fetch backend IP
-        axios.get(`${API_BASE_URL}/api/backend-ip`)
-            .then(response => {
-                setBackendIp(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching backend IP:', error);
-            });
-
-        // Fetch frontend IP
-        axios.get('https://api.ipify.org?format=json')
-            .then(response => {
-                setFrontendIp(response.data.ip);
-            })
-            .catch(error => {
-                console.error('Error fetching frontend IP:', error);
-            });
+        axios.get(`${API_BASE_URL}/api/todo`)
+            .then(response => setItems(response.data))
+            .catch(error => console.error('There was an error fetching the ToDo items!', error));
     }, []);
 
-    const handleAddTask = () => {
-        if (newTask.trim() !== '') {
-            setTasks([...tasks, newTask]);
-            setNewTask('');
-        }
+    const addItem = () => {
+        axios.post(`${API_BASE_URL}/api/todo`, { description, isCompleted: false })
+            .then(response => setItems([...items, response.data]))
+            .catch(error => console.error('There was an error adding the ToDo item!', error));
     };
 
     return (
         <div>
-            <h1>ToDo Application</h1>
-            <p>Backend IP: {backendIp}</p>
-            <p>Frontend IP: {frontendIp}</p>
-            <div>
-                <input
-                    type="text"
-                    value={newTask}
-                    onChange={(e) => setNewTask(e.target.value)}
-                    placeholder="Add a new task"
-                />
-                <button onClick={handleAddTask}>Add Task</button>
-            </div>
+            <h1>ToDo List</h1>
+            <input value={description} onChange={e => setDescription(e.target.value)} />
+            <button onClick={addItem}>Add</button>
             <ul>
-                {tasks.map((task, index) => (
-                    <li key={index}>{task}</li>
+                {items.map(item => (
+                    <li key={item.id}>{item.description}</li>
                 ))}
             </ul>
-            {/* ... other components and logic ... */}
         </div>
     );
 }

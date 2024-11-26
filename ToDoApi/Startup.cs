@@ -60,11 +60,6 @@ namespace ToDoApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapGet("/api/backend-ip", async context =>
-                {
-                    var backendIp = Environment.GetEnvironmentVariable("BACKEND_IP") ?? "Unknown";
-                    await context.Response.WriteAsync(backendIp);
-                });
             });
         }
 
