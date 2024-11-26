@@ -1,5 +1,5 @@
-#$SecondaryBackendIP = "10.1.2.4"
-$SecondaryBackendIP = "10.0.3.4"
+$SecondaryBackendIP = "10.1.2.4"
+#$SecondaryBackendIP = "10.0.3.4"
 $FrontendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\todo-frontend\.env" # Path to the frontend .env file
 $LogFilePath = "C:\Temp\FrontendScript.log"
 $ServiceLogFilePath = "C:\Temp\FrontendService.log"

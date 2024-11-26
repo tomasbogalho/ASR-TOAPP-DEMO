@@ -1,8 +1,8 @@
 $PrimaryBackendResourceGroupName = "rgasrwlpri903daa34"
 $SecondaryBackendResourceGroupName = "rgasrwlsec903daa34-northeurope"
 $BackendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\ToDoApi\.env" # Path to the backend .env file
-#$newBackendIP = "10.1.2.4"
-$newBackendIP = "10.0.3.4"
+$newBackendIP = "10.1.2.4"
+#$newBackendIP = "10.0.3.4"
 $LogFilePath = "C:\Temp\BackendScript.log"
 $ServiceLogFilePath = "C:\Temp\BackendService.log"
 $TaskName = "StartBackendService"
