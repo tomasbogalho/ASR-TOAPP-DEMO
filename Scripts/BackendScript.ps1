@@ -67,7 +67,7 @@ Start-Sleep -Seconds 5
 
 # Check if the backend service is running
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:5000" -UseBasicParsing
+    $response = Invoke-WebRequest -Uri "http://localhost:6003" -UseBasicParsing
     if ($response.StatusCode -eq 200) {
         Write-Output 'Backend service is running.' | Out-File $LogFilePath -Append
     } else {

@@ -60,7 +60,7 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
 
     # Check if the frontend service is running
     try {
-        $response = Invoke-WebRequest -Uri "http://localhost:6003" -UseBasicParsing
+        $response = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing
         if ($response.StatusCode -eq 200) {
             Write-Output 'Frontend service is running.' | Out-File $LogFilePath -Append
         } else {
