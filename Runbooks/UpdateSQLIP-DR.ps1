@@ -4,12 +4,14 @@ param (
 )
 
 # Define static variables
-$SecondaryFrontendResourceGroupName = "rgasrwlsec903daa34-northeurope"
+
 $PrimaryBackendIP = "10.0.3.4"
 $SecondaryBackendIP = "10.1.2.4"
 
 $PrimaryBackendResourceGroupName = "rgasrwlpri903daa34"
+$PrimaryFrontendResourceGroupName = "rgasrwlpri903daa34"
 $SecondaryBackendResourceGroupName = "rgasrwlsec903daa34-northeurope"
+$SecondaryFrontendResourceGroupName = "rgasrwlsec903daa34-northeurope"
 
 # Log the contents of the RecoveryPlanContext parameter
 Write-Output "RecoveryPlanContext parameter contents:"
