@@ -45,6 +45,7 @@ namespace ToDoApi
                 Console.WriteLine("Connection string is null or empty.");
             }
         }
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -64,22 +65,6 @@ namespace ToDoApi
                     var backendIp = Environment.GetEnvironmentVariable("BACKEND_IP") ?? "Unknown";
                     await context.Response.WriteAsync(backendIp);
                 });
-            });
-        }
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseRouting();
-
-            app.UseCors("AllowAllOrigins");
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
             });
         }
 
