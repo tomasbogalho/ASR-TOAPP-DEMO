@@ -6,6 +6,8 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 function ToDo() {
     const [backendIp, setBackendIp] = useState('');
     const [frontendIp, setFrontendIp] = useState('');
+    const [tasks, setTasks] = useState([]);
+    const [newTask, setNewTask] = useState('');
 
     useEffect(() => {
         // Fetch backend IP
@@ -27,11 +29,32 @@ function ToDo() {
             });
     }, []);
 
+    const handleAddTask = () => {
+        if (newTask.trim() !== '') {
+            setTasks([...tasks, newTask]);
+            setNewTask('');
+        }
+    };
+
     return (
         <div>
             <h1>ToDo Application</h1>
             <p>Backend IP: {backendIp}</p>
             <p>Frontend IP: {frontendIp}</p>
+            <div>
+                <input
+                    type="text"
+                    value={newTask}
+                    onChange={(e) => setNewTask(e.target.value)}
+                    placeholder="Add a new task"
+                />
+                <button onClick={handleAddTask}>Add Task</button>
+            </div>
+            <ul>
+                {tasks.map((task, index) => (
+                    <li key={index}>{task}</li>
+                ))}
+            </ul>
             {/* ... other components and logic ... */}
         </div>
     );
