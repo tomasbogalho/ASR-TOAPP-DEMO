@@ -17,8 +17,8 @@ if (Test-Path $FrontendEnvFilePath) {
     $envFileContent = Get-Content -Path $envFilePath
     Write-Output 'Current .env file content:' | Out-File $LogFilePath -Append
     Write-Output $envFileContent | Out-File $LogFilePath -Append
-    $updatedEnvFileContent = "REACT_APP_API_BASE_URL=http://"+$newBackendIP+":6003"
-    Set-Content -Path $envFilePath -Value $updatedEnvFileContent
+    $updatedEnvFileContent = $envFileContent -replace "REACT_APP_API_BASE_URL=.*", "REACT_APP_API_BASE_URL=http://"+$newBackendIP+":6003"
+    Set-Content -Path $envFilePath -Value $updatedEnvFileContent -Force
     Write-Output 'Updated .env file content:' | Out-File $LogFilePath -Append
     Write-Output $updatedEnvFileContent | Out-File $LogFilePath -Append
     Write-Output 'Frontend .env file updated successfully.' | Out-File $LogFilePath -Append
@@ -37,8 +37,8 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     }
 
     # Ensure kill-port package is installed
-    Write-Output 'Ensuring kill-port package is installed...' | Out-File $LogFilePath -Append
-    npm install kill-port | Out-File $LogFilePath -Append
+    #Write-Output 'Ensuring kill-port package is installed...' | Out-File $LogFilePath -Append
+    #npm install kill-port | Out-File $LogFilePath -Append
 
     # Kill any process using port 3000
     npx kill-port 3000 | Out-File $LogFilePath -Append
@@ -56,23 +56,23 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
 
     # Wait for a longer period to allow the service to start
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 10
 
     # Check if the frontend service is running
-    try {
-        $response = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing
-        if ($response.StatusCode -eq 200) {
-            Write-Output 'Frontend service is running.' | Out-File $LogFilePath -Append
-        } else {
-            Write-Output 'Frontend service is not running. Status code: ' + $response.StatusCode | Out-File $LogFilePath -Append
-        }
-    } catch {
-        Write-Output 'Failed to access frontend service. Error: ' + $_.Exception.Message | Out-File $LogFilePath -Append
-    }
+    #try {
+    #    $response = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing
+    #    if ($response.StatusCode -eq 200) {
+    #        Write-Output 'Frontend service is running.' | Out-File $LogFilePath -Append
+    #    } else {
+    #        Write-Output 'Frontend service is not running. Status code: ' + $response.StatusCode | Out-File $LogFilePath -Append
+    #    }
+    #} catch {
+    #    Write-Output 'Failed to access frontend service. Error: ' + $_.Exception.Message | Out-File $LogFilePath -Append
+    #}
 
     # Output the contents of the service log file
-    Write-Output 'Frontend service log:' | Out-File $LogFilePath -Append
-    Get-Content -Path $ServiceLogFilePath | Out-File $LogFilePath -Append
+    #Write-Output 'Frontend service log:' | Out-File $LogFilePath -Append
+    #Get-Content -Path $ServiceLogFilePath | Out-File $LogFilePath -Append
 
     # Clean up the scheduled task
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false | Out-File $LogFilePath -Append

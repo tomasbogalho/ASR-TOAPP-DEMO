@@ -63,23 +63,23 @@ Start-ScheduledTask -TaskName $TaskName | Out-File $LogFilePath -Append
 Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
 
 # Wait for a longer period to allow the service to start
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 10
 
 # Check if the backend service is running
-try {
-    $response = Invoke-WebRequest -Uri "http://localhost:6003" -UseBasicParsing
-    if ($response.StatusCode -eq 200) {
-        Write-Output 'Backend service is running.' | Out-File $LogFilePath -Append
-    } else {
-        Write-Output 'Backend service is not running. Status code: ' + $response.StatusCode | Out-File $LogFilePath -Append
-    }
-} catch {
-    Write-Output 'Failed to access backend service. Error: ' + $_.Exception.Message | Out-File $LogFilePath -Append
-}
+#try {
+#    $response = Invoke-WebRequest -Uri "http://localhost:6003" -UseBasicParsing
+#    if ($response.StatusCode -eq 200) {
+#        Write-Output 'Backend service is running.' | Out-File $LogFilePath -Append
+#    } else {
+#        Write-Output 'Backend service is not running. Status code: ' + $response.StatusCode | Out-File $LogFilePath -Append
+#    }
+#} catch {
+#    Write-Output 'Failed to access backend service. Error: ' + $_.Exception.Message | Out-File $LogFilePath -Append
+#}
 
 # Output the contents of the service log file
-Write-Output 'Backend service log:' | Out-File $LogFilePath -Append
-Get-Content -Path $ServiceLogFilePath | Out-File $LogFilePath -Append
+#Write-Output 'Backend service log:' | Out-File $LogFilePath -Append
+#Get-Content -Path $ServiceLogFilePath | Out-File $LogFilePath -Append
 
 # Clean up the scheduled task
 Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false | Out-File $LogFilePath -Append
