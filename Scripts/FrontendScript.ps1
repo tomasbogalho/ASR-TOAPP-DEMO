@@ -46,11 +46,14 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
 
     # Create a scheduled task to start the frontend service
     Write-Output 'Creating scheduled task to start frontend service...' | Out-File $LogFilePath -Append
-    $Action = New-ScheduledTaskAction -Execute "npm" -Argument "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend"
-    #$Action = New-ScheduledTaskAction -Execute $npmPath -Argument "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend"
+    #$Action = New-ScheduledTaskAction -Execute "npm" -Argument "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend"
 
-    $Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(10)
+    $NpmPath = "C:\Program Files\nodejs\npm.cmd"
+    $Action = New-ScheduledTaskAction -Execute $npmPath -Argument "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend"
+
+    $Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(15)
     $Principal = New-ScheduledTaskPrincipal -UserId "TomasTheAdmin" -LogonType Interactive -RunLevel Highest
+    #$Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
     $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -DontStopOnIdleEnd -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
     Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Principal $Principal -Settings $Settings | Out-File $LogFilePath -Append
 
@@ -59,7 +62,7 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     Write-Output 'Scheduled task started successfully.' | Out-File $LogFilePath -Append
 
     # Wait for a longer period to allow the service to start
-    Start-Sleep -Seconds 30
+    Start-Sleep -Seconds 5
 
     # Check if the scheduled task is running
     $task = Get-ScheduledTask -TaskName $TaskName
