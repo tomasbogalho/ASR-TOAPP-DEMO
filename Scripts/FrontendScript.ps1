@@ -1,5 +1,5 @@
-$SecondaryBackendIP = "10.1.2.4"
-#$SecondaryBackendIP = "10.0.3.4"
+#$SecondaryBackendIP = "10.1.2.4"
+$SecondaryBackendIP = "10.0.3.4"
 $FrontendEnvFilePath = "C:\Users\TomasTheAdmin\demoapp\todo-frontend\.env" # Path to the frontend .env file
 $LogFilePath = "C:\Temp\FrontendScript.log"
 $ServiceLogFilePath = "C:\Temp\FrontendService.log"
@@ -47,8 +47,10 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     # Create a scheduled task to start the frontend service
     Write-Output 'Creating scheduled task to start frontend service...' | Out-File $LogFilePath -Append
     $Action = New-ScheduledTaskAction -Execute "npm" -Argument "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend"
-    $Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(5)
-    $Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+    #$Action = New-ScheduledTaskAction -Execute $npmPath -Argument "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend"
+
+    $Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(10)
+    $Principal = New-ScheduledTaskPrincipal -UserId "TomasTheAdmin" -LogonType Interactive -RunLevel Highest
     $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -DontStopOnIdleEnd -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
     Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Principal $Principal -Settings $Settings | Out-File $LogFilePath -Append
 
@@ -58,6 +60,14 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
 
     # Wait for a longer period to allow the service to start
     Start-Sleep -Seconds 30
+
+    # Check if the scheduled task is running
+    $task = Get-ScheduledTask -TaskName $TaskName
+    if ($task.State -eq 'Running') {
+        Write-Output 'Scheduled task is running.' | Out-File $LogFilePath -Append
+    } else {
+        Write-Output 'Scheduled task is not running. Current state: ' + $task.State | Out-File $LogFilePath -Append
+    }
 
     # Check if the frontend service is running
     #try {
