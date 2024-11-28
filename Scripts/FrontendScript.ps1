@@ -39,7 +39,7 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
 
     # Ensure kill-port package is installed
     #Write-Output 'Ensuring kill-port package is installed...' | Out-File $LogFilePath -Append
-    #npm install kill-port | Out-File $LogFilePath -Append
+    npm install kill-port | Out-File $LogFilePath -Append
 
     # Kill any process using port 3000
     npx kill-port 3000 | Out-File $LogFilePath -Append
