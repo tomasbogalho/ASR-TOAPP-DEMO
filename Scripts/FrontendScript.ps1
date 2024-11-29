@@ -52,8 +52,8 @@ if (Test-Path "C:\Users\TomasTheAdmin\demoapp\todo-frontend") {
     $Action = New-ScheduledTaskAction -Execute $npmPath -Argument "start" -WorkingDirectory "C:\Users\TomasTheAdmin\demoapp\todo-frontend"
 
     $Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(15)
-    $Principal = New-ScheduledTaskPrincipal -UserId "TomasTheAdmin" -LogonType Interactive -RunLevel Highest
-    #$Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+    #$Principal = New-ScheduledTaskPrincipal -UserId "TomasTheAdmin" -LogonType Interactive -RunLevel Highest
+    $Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
     $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -DontStopOnIdleEnd -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
     Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Principal $Principal -Settings $Settings | Out-File $LogFilePath -Append
 
